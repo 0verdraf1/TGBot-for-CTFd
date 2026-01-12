@@ -2,7 +2,7 @@
 from passlib.hash import bcrypt_sha256
 
 from config import DATABASE_URL
-from sqlalchemy import BigInteger, Boolean, Column, Integer, String, Text, text
+from sqlalchemy import BigInteger, Boolean, Column, Integer, String, Text, text, DateTime
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
@@ -62,6 +62,8 @@ class CTFdUser(Base):
     hidden = Column(Boolean, default=False)
     banned = Column(Boolean, default=False)
     verified = Column(Boolean, default=False)
+    created = Column(DateTime)
+    change_password = Column(Boolean, default=False)
 
 
 def hash_password(plaintext):
@@ -83,8 +85,8 @@ async def update_all_users_scores():
             FROM solves s
             JOIN challenges c ON s.challenge_id = c.id
             WHERE s.user_id = u.id
-        ), 0) 
-        + 
+        ), 0)
+        +
         COALESCE((
             SELECT SUM(a.value)
             FROM awards a
@@ -92,7 +94,7 @@ async def update_all_users_scores():
         ), 0)
     );
     """)
-    
+
     async with async_session() as session:
         await session.execute(sql)
         await session.commit()

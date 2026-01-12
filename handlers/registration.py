@@ -1,5 +1,5 @@
 """Регистрация участников в системе."""
-
+from datetime import datetime
 import os
 import re
 import secrets
@@ -339,6 +339,8 @@ async def finish_registration(message: types.Message, state: FSMContext):
                 hidden=False,
                 banned=False,
                 verified=True,
+                created=datetime.now(),
+                change_password=False
             )
             session.add(new_ctfd_user)
 

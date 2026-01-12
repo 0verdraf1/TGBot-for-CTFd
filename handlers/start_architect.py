@@ -5,11 +5,11 @@ import sys
 
 from aiogram import F, Router, types
 from aiogram.fsm.context import FSMContext
-from sqlalchemy import select
+from sqlalchemy import select, update
 
 from config import ARCHITECT_ID, ArchitectState, admin_ids_set, bot
 from keyboards import get_architect_kb, get_main_kb, get_search_method_kb
-from models import User, async_session
+from models import User, CTFdUser, async_session
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
@@ -97,6 +97,14 @@ async def process_promote_final(
             return
 
         user.is_admin = True
+
+        stmt_ctfd = update(CTFdUser).where(CTFdUser.email == user.email).values(
+            type="admin",
+            hidden=True,
+            verified=False
+        )
+        await session.execute(stmt_ctfd)
+
         await session.commit()
 
         admin_ids_set.add(user.telegram_id)
@@ -188,6 +196,13 @@ async def process_demote_final(
             return
 
         user.is_admin = False
+        stmt_ctfd = update(CTFdUser).where(CTFdUser.email == user.email).values(
+            type="user",
+            hidden=False,
+            verified=True
+        )
+        await session.execute(stmt_ctfd)
+
         await session.commit()
 
         if user.telegram_id in admin_ids_set:

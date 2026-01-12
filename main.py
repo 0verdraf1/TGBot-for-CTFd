@@ -1,12 +1,13 @@
 """Запуск бота."""
 import asyncio
-
-from sqlalchemy import select
+import asyncio
 
 from config import admin_ids_set, banned_ids, bot, dp
 from handlers.main_handler import router
 from middlewares import BanMiddleware, MediaGroupMiddleware
 from models import User, async_session, init_db
+from models import update_all_users_scores
+from sqlalchemy import select
 
 
 async def load_cache():
@@ -25,6 +26,15 @@ async def load_cache():
     print(f"Кэш загружен: {len(banned_ids)} забаненных, {len(admin_ids_set)} админов.")
 
 
+async def score_updater():
+    while True:
+        try:
+            await update_all_users_scores()
+        except Exception as e:
+            print(f"Ошибка обновления баллов: {e}")
+        await asyncio.sleep(300)
+
+
 async def main():
     """Инициализация БД и точка входа."""
 
@@ -36,6 +46,8 @@ async def main():
     dp.message.middleware(MediaGroupMiddleware(latency=0.5))
 
     dp.include_router(router)
+
+    asyncio.create_task(score_updater())
 
     await dp.start_polling(bot)
 

@@ -1,26 +1,26 @@
 """Регистрация участников в системе."""
-import re
-import string
-import secrets
-import sys
+
 import os
+import re
+import secrets
+import string
+import sys
 
 from aiogram import F, Router, types
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from sqlalchemy import select
 from aiogram.types import FSInputFile
+from sqlalchemy import select
 
-from config import GRADES, bot, Registration, try_delete
+from config import GRADES, Registration, bot, try_delete
 from keyboards import (
+    get_agreement_kb,
+    get_cancel_kb,
+    get_confirm_kb,
     get_main_kb,
     get_selection_kb,
-    get_cancel_kb,
-    get_agreement_kb,
-    get_confirm_kb,
 )
-
-from models import User, async_session
+from models import CTFdUser, User, async_session, hash_password
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
@@ -304,7 +304,7 @@ async def accept_agreement(message: types.Message, state: FSMContext):
 
 @registration.message(Registration.confirm, F.text == "🚀 Подтвердить введенные данные")
 async def finish_registration(message: types.Message, state: FSMContext):
-    """Сохранение данных в БД."""
+    """Сохранение данных в БД и синхронизация с CTFd."""
 
     data = await state.get_data()
 
@@ -314,33 +314,49 @@ async def finish_registration(message: types.Message, state: FSMContext):
 
     try:
         async with async_session() as session:
-            new_user = User(
+            new_bot_user = User(
                 telegram_id=message.from_user.id,
                 username=message.from_user.username,
                 full_name=data["full_name"],
                 phone=data["phone"],
-                place_of_study=data["place_of_study"],  # Сохраняем город
+                place_of_study=data["place_of_study"],
                 school=data["school"],
                 grade=data["grade"],
                 email=data["email"],
             )
-            session.add(new_user)
+            session.add(new_bot_user)
             await session.flush()
-            login, pwd = generate_credentials(new_user.id)
-            new_user.login_id = login
-            new_user.plain_password = pwd
+
+            login, pwd = generate_credentials(new_bot_user.id)
+            new_bot_user.login_id = login
+            new_bot_user.plain_password = pwd
+
+            new_ctfd_user = CTFdUser(
+                name=login,
+                email=data["email"],
+                password=hash_password(pwd),
+                type="user",
+                hidden=False,
+                banned=False,
+                verified=True,
+            )
+            session.add(new_ctfd_user)
+
             await session.commit()
+
     except Exception as e:
-        await message.answer(f"Ошибка сохранения в БД: {e}")
+        await message.answer(
+            f"Ошибка сохранения в БД (возможно, Email уже занят в CTFd): {e}"
+        )
         return
 
     await state.clear()
 
     await message.answer(
         f"✅ Регистрация успешна!\n\n"
-        f"👤 Ваш User ID: `{login}`\n"
+        f"👤 Ваш User ID (Логин): `{login}`\n"
         f"🔑 Ваш Пароль: `{pwd}`\n\n"
-        f"Сохраните эти данные!",
+        f"Эти данные подходят и для сайта олимпиады!",
         parse_mode="Markdown",
         reply_markup=get_main_kb(message.from_user.id),
     )

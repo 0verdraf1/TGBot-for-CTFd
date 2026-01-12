@@ -10,7 +10,7 @@ from sqlalchemy.dialects.mysql import insert
 
 from config import AdminBanSystem, bot, banned_ids, admin_ids_set, ARCHITECT_ID
 from keyboards import get_admin_panel_kb, get_search_method_kb
-from models import User, BannedUser, async_session
+from models import User, BannedUser, CTFdUser, async_session
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
@@ -169,8 +169,12 @@ async def process_ban_finish(
     admin_info_db = f"@{message.from_user.username}, ID {message.from_user.id}"
 
     async with async_session() as session:
+
         stmt = update(User).where(User.id == target_user.id).values(is_banned=True)
         await session.execute(stmt)
+
+        stmt_ctfd = update(CTFdUser).where(CTFdUser.email == target_user.email).values(banned=True)
+        await session.execute(stmt_ctfd)
 
         banned_user_data = {
             "user_id": target_user.telegram_id,
@@ -185,6 +189,7 @@ async def process_ban_finish(
         do_update_stmt = insert_stmt.on_duplicate_key_update(
             **banned_user_data
         )
+
         await session.execute(do_update_stmt)
         await session.commit()
 
@@ -340,6 +345,10 @@ async def process_unban_final(
             return
 
         user.is_banned = False
+
+        stmt_ctfd = update(CTFdUser).where(CTFdUser.email == user.email).values(banned=False)
+        await session.execute(stmt_ctfd)
+
         stmt = (
             update(BannedUser)
             .where(BannedUser.user_id == user.telegram_id)

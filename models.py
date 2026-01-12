@@ -15,17 +15,17 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     telegram_id = Column(BigInteger, unique=True, nullable=False)
-    username = Column(String, nullable=True)
-    full_name = Column(String, nullable=False)
-    phone = Column(String, nullable=False)
-    place_of_study = Column(String, nullable=False)
-    school = Column(String, nullable=False)
-    grade = Column(String, nullable=False)
-    email = Column(String, nullable=False)
+    username = Column(String(255), nullable=True)
+    full_name = Column(String(255), nullable=False)
+    phone = Column(String(255), nullable=False)
+    place_of_study = Column(String(255), nullable=False)
+    school = Column(String(255), nullable=False)
+    grade = Column(String(255), nullable=False)
+    email = Column(String(255), nullable=False)
     points = Column(Integer, default=0)
 
-    login_id = Column(String, unique=True)
-    plain_password = Column(String)
+    login_id = Column(String(255), unique=True)
+    plain_password = Column(String(255))
 
     is_banned = Column(Boolean, default=False)
     is_admin = Column(Boolean, default=False)
@@ -38,14 +38,14 @@ class BannedUser(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(BigInteger, unique=True, nullable=False)
-    username = Column(String, nullable=True)
+    username = Column(String(255), nullable=True)
     reason = Column(Text, nullable=False)
 
-    admin_who_banned = Column(String, nullable=False)
+    admin_who_banned = Column(String(255), nullable=False)
 
     proof = Column(Text, nullable=True)
 
-    admin_who_unbanned = Column(String, nullable=True)
+    admin_who_unbanned = Column(String(255), nullable=True)
 
 
 engine = create_async_engine(DATABASE_URL, echo=False)

@@ -355,10 +355,10 @@ async def finish_registration(message: types.Message, state: FSMContext):
     await state.clear()
 
     await message.answer(
-        f"✅ Регистрация успешна!\n\n"
+        f"✅ Регистрация успешно завршена!\n\n"
         f"👤 Ваш User ID (Логин): `{login}`\n"
         f"🔑 Ваш Пароль: `{pwd}`\n\n"
-        f"Эти данные подходят и для сайта олимпиады!",
+        f"Используйте эти данные для входа на сайт олимпиады!",
         parse_mode="Markdown",
         reply_markup=get_main_kb(message.from_user.id),
     )

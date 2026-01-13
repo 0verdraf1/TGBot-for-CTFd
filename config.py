@@ -32,7 +32,7 @@ admin_ids_set: set[int] = set(ENV_ADMIN_IDS)
 if ARCHITECT_ID:
     admin_ids_set.add(ARCHITECT_ID)
 
-GRADES = [f"{i} класс" for i in range(1, 12)] + [f"{i} курс" for i in range(1, 5)]
+GRADES = [f"{i} класс" for i in range(8, 12)] + [f"{i} курс" for i in range(1, 5)]
 
 
 class Registration(StatesGroup):

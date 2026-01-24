@@ -41,7 +41,11 @@ async def cmd_start(message: types.Message):
     """Нажатие на кнопку старт или /start."""
 
     await message.answer(
-        "Добро пожаловать...", reply_markup=get_main_kb(message.from_user.id)
+        "📣 Добро пожаловать! 📣\n\n"
+        "💬 <a href='ссылка на чат'>Наш чат</a>\n"
+        "🔈 <a href='ссылка на канал'>Наш канал</a>",
+        parse_mode="HTML",
+        reply_markup=get_main_kb(message.from_user.id),
     )
 
 

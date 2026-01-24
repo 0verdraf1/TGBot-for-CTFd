@@ -228,7 +228,10 @@ async def process_demote_final(
 
 @architect_router.message(F.text == "📨 Разослать креды")
 async def broadcast_creds(message: types.Message):
-    """Рассылка данных для входа."""
+    """
+    Рассылка данных для входа.
+    Забаненным пользователям данные НЕ отправляются.
+    """
 
     if message.from_user.id != ARCHITECT_ID:
         return
@@ -236,16 +239,19 @@ async def broadcast_creds(message: types.Message):
     msg = await message.answer("⏳ Начинаю массовую рассылку логинов и паролей...")
 
     async with async_session() as session:
-        result = await session.execute(select(User))
+        result = await session.execute(select(User).where(User.is_banned is False))
         users = result.scalars().all()
 
     count = 0
     for user in users:
         try:
             creds_text = (
-                f"🔔 Ваши данные для входа:\n"
-                f"Login: `{user.login_id}`\n"
-                f"Password: `{user.plain_password}`"
+                f"⏰ Олимпиада началась! ⏰\n\n"
+                f"Ваши данные для входа:\n"
+                f"🎩 Логин: `{user.login_id}`\n"
+                f"🔑 Пароль: `{user.plain_password}`"
+                f"🌐 Задания здесь: <ссылка на борду>\n\n"
+                f"Используйте эти данные для входа на сайт по ссылке выше!"
             )
             await bot.send_message(user.telegram_id, creds_text, parse_mode="Markdown")
             count += 1

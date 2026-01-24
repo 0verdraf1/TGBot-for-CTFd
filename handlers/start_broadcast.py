@@ -39,10 +39,15 @@ async def process_broadcast(
     state: FSMContext,
     album: List[types.Message] = None
 ):
-    """Начало рассылки сообщений участникам."""
+    """
+    Начало рассылки сообщений участникам.
+    Забанненым пользователям рассылка не происходит.
+    """
 
     async with async_session() as session:
-        users_result = await session.execute(select(User.telegram_id))
+        users_result = await session.execute(
+            select(User.telegram_id).where(User.is_banned is False)
+            )
         users_ids = users_result.scalars().all()
 
     count = 0

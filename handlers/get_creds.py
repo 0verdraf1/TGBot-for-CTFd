@@ -25,9 +25,9 @@ async def get_credentials(message: types.Message):
 
         if user:
             await message.answer(
-                f"Ваши данные:\n"
-                f"Login: `{user.login_id}`\n"
-                f"Password: `{user.plain_password}`",
+                f"Ваши данные для входа:\n"
+                f"🎩 Логин: `{user.login_id}`\n"
+                f"🔑 Пароль: `{user.plain_password}`\n",
                 parse_mode="Markdown",
             )
         else:

@@ -1,4 +1,5 @@
 """Рассылка сообщений участникам."""
+
 import asyncio
 import os
 import sys
@@ -13,7 +14,7 @@ from config import AdminPanel, admin_ids_set, bot
 from keyboards import get_admin_panel_kb
 from models import User, async_session
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 
 broad = Router()
@@ -35,19 +36,22 @@ async def start_broadcast(message: types.Message, state: FSMContext):
 
 @broad.message(AdminPanel.waiting_for_broadcast_content)
 async def process_broadcast(
-    message: types.Message,
-    state: FSMContext,
-    album: List[types.Message] = None
+    message: types.Message, state: FSMContext, album: List[types.Message] = None
 ):
     """
     Начало рассылки сообщений участникам.
     Забанненым пользователям рассылка не происходит.
     """
 
+    if message.text == "🏠 На главную":
+        await state.clear()
+        await message.answer("Рассылка отменена.", reply_markup=get_admin_panel_kb())
+        return
+
     async with async_session() as session:
         users_result = await session.execute(
-            select(User.telegram_id).where(User.is_banned is False)
-            )
+            select(User.telegram_id).where(User.is_banned == False)
+        )
         users_ids = users_result.scalars().all()
 
     count = 0
@@ -62,46 +66,67 @@ async def process_broadcast(
                 builder.add_photo(
                     media=element.photo[-1].file_id,
                     caption=element.caption,
-                    caption_entities=element.caption_entities
+                    caption_entities=element.caption_entities,
                 )
             elif element.video:
                 builder.add_video(
                     media=element.video.file_id,
                     caption=element.caption,
-                    caption_entities=element.caption_entities
+                    caption_entities=element.caption_entities,
                 )
             elif element.document:
                 builder.add_document(
                     media=element.document.file_id,
                     caption=element.caption,
-                    caption_entities=element.caption_entities
+                    caption_entities=element.caption_entities,
                 )
             elif element.audio:
                 builder.add_audio(
                     media=element.audio.file_id,
                     caption=element.caption,
-                    caption_entities=element.caption_entities
+                    caption_entities=element.caption_entities,
                 )
 
         album_data = []
         for element in album:
             if element.photo:
-                album_data.append(('photo', element.photo[-1].file_id, element.caption, element.caption_entities))
+                album_data.append(
+                    (
+                        "photo",
+                        element.photo[-1].file_id,
+                        element.caption,
+                        element.caption_entities,
+                    )
+                )
             elif element.video:
-                album_data.append(('video', element.video.file_id, element.caption, element.caption_entities))
+                album_data.append(
+                    (
+                        "video",
+                        element.video.file_id,
+                        element.caption,
+                        element.caption_entities,
+                    )
+                )
             elif element.document:
-                album_data.append(('document', element.document.file_id, element.caption, element.caption_entities))
+                album_data.append(
+                    (
+                        "document",
+                        element.document.file_id,
+                        element.caption,
+                        element.caption_entities,
+                    )
+                )
 
     for user_id in users_ids:
         try:
             if is_album:
                 mb = MediaGroupBuilder()
                 for m_type, m_id, m_cap, m_ents in album_data:
-                    if m_type == 'photo':
+                    if m_type == "photo":
                         mb.add_photo(m_id, caption=m_cap, caption_entities=m_ents)
-                    elif m_type == 'video':
+                    elif m_type == "video":
                         mb.add_video(m_id, caption=m_cap, caption_entities=m_ents)
-                    elif m_type == 'document':
+                    elif m_type == "document":
                         mb.add_document(m_id, caption=m_cap, caption_entities=m_ents)
 
                 await bot.send_media_group(chat_id=user_id, media=mb.build())

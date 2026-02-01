@@ -239,7 +239,7 @@ async def broadcast_creds(message: types.Message):
     msg = await message.answer("⏳ Начинаю массовую рассылку логинов и паролей...")
 
     async with async_session() as session:
-        result = await session.execute(select(User).where(User.is_banned is False))
+        result = await session.execute(select(User).where(User.is_banned == False))
         users = result.scalars().all()
 
     count = 0

@@ -11,7 +11,7 @@ from aiogram.utils.media_group import MediaGroupBuilder
 from sqlalchemy import select
 
 from config import AdminPanel, admin_ids_set, bot
-from keyboards import get_admin_panel_kb
+from keyboards import get_admin_panel_kb, get_cancel_kb
 from models import User, async_session
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
@@ -30,7 +30,7 @@ async def start_broadcast(message: types.Message, state: FSMContext):
     await message.answer(
         "Отправьте сообщение (текст, фото, альбом, файл), которое "
         "нужно разослать всем участникам.",
-        reply_markup=types.ReplyKeyboardRemove(),
+        reply_markup=get_cancel_kb(),
     )
 
 

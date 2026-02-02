@@ -15,11 +15,11 @@ async def load_cache():
 
     async with async_session() as session:
 
-        res_banned = await session.execute(select(User.telegram_id).where(User.is_banned is True))
+        res_banned = await session.execute(select(User.telegram_id).where(User.is_banned == True))
         for uid in res_banned.scalars().all():
             banned_ids.add(uid)
 
-        res_admins = await session.execute(select(User.telegram_id).where(User.is_admin is True))
+        res_admins = await session.execute(select(User.telegram_id).where(User.is_admin == True))
         for uid in res_admins.scalars().all():
             admin_ids_set.add(uid)
 

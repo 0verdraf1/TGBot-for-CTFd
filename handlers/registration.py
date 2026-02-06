@@ -1,5 +1,6 @@
 """Регистрация участников в системе."""
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
+import time
 import os
 import re
 import secrets
@@ -70,9 +71,23 @@ async def cancel_registration(message: types.Message, state: FSMContext):
 
 @registration.message(F.text == "📝 Зарегистрироваться")
 async def start_register(message: types.Message, state: FSMContext):
-    """Регистрация пользователя, ввод Ф.И.О."""
+    """Регистрация пользователя."""
 
     await try_delete(bot, message.chat.id, message.message_id)
+
+    data = await state.get_data()
+
+    if data.get("reg_blocked", False):
+        return
+
+    last_click = data.get("last_click_time", 0)
+    current_time = time.time()
+    if current_time - last_click < 60.0:
+        return
+    await state.update_data(last_click_time=current_time)
+
+    if "last_bot_msg_id" in data:
+        await try_delete(bot, message.chat.id, data["last_bot_msg_id"])
 
     async with async_session() as session:
         result = await session.execute(
@@ -80,14 +95,31 @@ async def start_register(message: types.Message, state: FSMContext):
         )
         if result.scalar():
             msg = await message.answer(
-                "Вы уже зарегистрированы! Получите логин и пароль."
+                "✅ Вы уже зарегистрированы!\nИспользуйте кнопку 'Получить логин и пароль'."
             )
+
+            await state.update_data(reg_blocked=True, last_bot_msg_id=msg.message_id)
             return
+
+    moscow_tz = timezone(timedelta(hours=3))
+    REGISTRATION_DEADLINE = datetime(2026, 2, 7, 11, 0, 0, tzinfo=moscow_tz)
+
+    if datetime.now(moscow_tz) > REGISTRATION_DEADLINE:
+        msg = await message.answer(
+            "⛔ <b>РЕГИСТРАЦИЯ ЗАКРЫТА</b> ⛔\n\n"
+            "Прием заявок завершен <дата, когда азвершен прием заявок>.\n"
+            "Спасибо за проявленный интерес!",
+            parse_mode="HTML"
+        )
+
+        await state.update_data(reg_blocked=True, last_bot_msg_id=msg.message_id)
+        return
 
     await state.set_state(Registration.full_name)
 
     msg = await message.answer(
-        "Введите ваше Ф.И.О. (полностью):", reply_markup=get_cancel_kb()
+        "Введите ваше Ф.И.О. (полностью):",
+        reply_markup=get_cancel_kb()
     )
     await state.update_data(last_bot_msg_id=msg.message_id)
 
@@ -359,10 +391,10 @@ async def finish_registration(message: types.Message, state: FSMContext):
     await state.clear()
 
     await message.answer(
-        f"✅ Регистрация успешно завршена!\n\n"
-        f"👤 Ваш User ID (Логин): `{login}`\n"
+        f"✅ Регистрация успешно завершена!\n\n"
+        f"👤 Ваш Логин: `{login}`\n"
         f"🔑 Ваш Пароль: `{pwd}`\n\n"
-        f"Используйте эти данные для входа на сайт олимпиады!",
+        f"Используйте эти данные для входа после начала олимпиады!",
         parse_mode="Markdown",
         reply_markup=get_main_kb(message.from_user.id),
     )

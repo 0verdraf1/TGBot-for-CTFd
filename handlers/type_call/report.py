@@ -128,14 +128,25 @@ async def process_report_proof(
                 )
                 sent_messages_info.append((admin_id, sent_msg.message_id))
 
-            elif message.photo:
-                sent_msg = await bot.send_photo(
-                    chat_id=admin_id,
-                    photo=message.photo[-1].file_id,
-                    caption=report_text,
-                    parse_mode="HTML",
-                    reply_markup=kb
-                )
+            elif message.photo or message.document:
+                common_params = {
+                    "chat_id": admin_id,
+                    "caption": report_text,
+                    "parse_mode": "HTML",
+                    "reply_markup": kb
+                }
+
+                if message.photo:
+                    sent_msg = await bot.send_photo(
+                        photo=message.photo[-1].file_id,
+                        **common_params
+                    )
+                else:
+                    sent_msg = await bot.send_document(
+                        document=message.document.file_id,
+                        **common_params
+                    )
+
                 sent_messages_info.append((admin_id, sent_msg.message_id))
 
             else:
@@ -145,6 +156,7 @@ async def process_report_proof(
                     parse_mode="HTML",
                     reply_markup=kb
                 )
+
                 sent_messages_info.append((admin_id, sent_msg.message_id))
 
         except Exception as e:

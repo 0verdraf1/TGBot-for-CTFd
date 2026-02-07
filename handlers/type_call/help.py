@@ -93,20 +93,28 @@ async def forward_to_admin(
                     parse_mode="HTML",
                     reply_markup=kb
                 )
+
                 sent_messages_info.append((admin_id, sent_msg.message_id))
 
             elif message.photo or message.document:
-                file_id = message.photo[-1].file_id if message.photo else message.document.file_id
-                method = bot.send_photo if message.photo else bot.send_document
+                common_params = {
+                    "chat_id": admin_id,
+                    "caption": full_text_msg,
+                    "parse_mode": "HTML",
+                    "reply_markup": kb
+                }
 
-                sent_msg = await method(
-                    chat_id=admin_id,
-                    photo=file_id if message.photo else None,
-                    document=file_id if message.document else None,
-                    caption=full_text_msg,
-                    parse_mode="HTML",
-                    reply_markup=kb
-                )
+                if message.photo:
+                    sent_msg = await bot.send_photo(
+                        photo=message.photo[-1].file_id,
+                        **common_params
+                    )
+                else:
+                    sent_msg = await bot.send_document(
+                        document=message.document.file_id,
+                        **common_params
+                    )
+
                 sent_messages_info.append((admin_id, sent_msg.message_id))
 
             else:

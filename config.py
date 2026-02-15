@@ -112,6 +112,7 @@ class DiplomaSurvey(StatesGroup):
 
     impressions = State()
     olymp_source = State()
+    olymp_source_text = State()
     desire_to_enroll = State()
 
 

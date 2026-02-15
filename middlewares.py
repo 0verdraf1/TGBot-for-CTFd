@@ -132,6 +132,7 @@ class AccessMiddleware(BaseMiddleware):
                 event.data in ["contact_support", "report_violation"]
                 or event.data.startswith("reply_")
                 or event.data.startswith("enroll_")
+                or event.data.startswith("source_")
             ):
                 return await handler(event, data)
 

@@ -152,6 +152,7 @@ def get_selection_kb(items, prefix):
 
 def get_cancel_kb():
     """Клавиатура отмены действия."""
+
     return ReplyKeyboardMarkup(
         keyboard=[[KeyboardButton(text="🏠 На главную")]],
         resize_keyboard=True
@@ -159,7 +160,8 @@ def get_cancel_kb():
 
 
 def get_search_method_kb():
-    """Выбор метода поиска участника (Inline)."""
+    """Выбор метода поиска участника."""
+
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
@@ -170,14 +172,28 @@ def get_search_method_kb():
     )
 
 
-def get_yes_no_kb():
-    """Инлайн кнопки Да/Нет."""
+def get_olymp_source_kb():
+    """Кнопки для вопроса 'Откуда узнали'."""
 
     return InlineKeyboardMarkup(
         inline_keyboard=[
-            [
-                InlineKeyboardButton(text="✅ Да", callback_data="enroll_yes"),
-                InlineKeyboardButton(text="❌ Нет", callback_data="enroll_no")
-            ]
+            [InlineKeyboardButton(text="🏫 Из школы", callback_data="source_school")],
+            [InlineKeyboardButton(text="🚀 Из Telegram-канала ВКА", callback_data="source_vka")],
+            [InlineKeyboardButton(text="📢 Из Telegram-канала 1Т Старт", callback_data="source_1t")],
+            [InlineKeyboardButton(text="👥 От знакомых", callback_data="source_friends")],
+            [InlineKeyboardButton(text="🔄 Участвовал ранее", callback_data="source_previous")],
+            [InlineKeyboardButton(text="✏️ Другое", callback_data="source_other")],
+        ]
+    )
+
+
+def get_enroll_intent_kb():
+    """Кнопки для вопроса 'Планируете поступать'."""
+
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="💻 Планирую на 6 факультет", callback_data="enroll_6")],
+            [InlineKeyboardButton(text="🏢 Планирую на другой факультет", callback_data="enroll_other")],
+            [InlineKeyboardButton(text="❌ Не планирую поступать", callback_data="enroll_no")],
         ]
     )

@@ -99,7 +99,8 @@ class AccessMiddleware(BaseMiddleware):
             "🔔 Связь с организаторами",
             "👀 Сообщить о нарушении правил",
             "🆘 У меня проблема",
-            "🏠 На главную"
+            "🏠 На главную",
+            "🎓 Получить диплом/сертификат"
         ]
 
         if isinstance(event, Message):
@@ -107,9 +108,10 @@ class AccessMiddleware(BaseMiddleware):
             current_state = await state.get_state() if state else None
 
             if current_state and (
-                current_state.startswith("Report:") or 
-                current_state.startswith("Support:") or 
-                current_state.startswith("UserState:")
+                current_state.startswith("Report:") or
+                current_state.startswith("Support:") or
+                current_state.startswith("UserState:") or
+                current_state.startswith("DiplomaSurvey:")
             ):
                 return await handler(event, data)
 
@@ -126,7 +128,11 @@ class AccessMiddleware(BaseMiddleware):
                 return
 
         if isinstance(event, CallbackQuery):
-            if event.data in ["contact_support", "report_violation"] or event.data.startswith("reply_"):
+            if (
+                event.data in ["contact_support", "report_violation"]
+                or event.data.startswith("reply_")
+                or event.data.startswith("enroll_")
+            ):
                 return await handler(event, data)
 
             await event.answer("Функция недоступна.", show_alert=True)

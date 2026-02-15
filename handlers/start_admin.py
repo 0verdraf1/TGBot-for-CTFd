@@ -64,7 +64,10 @@ async def export_results(message: types.Message):
             "Email",
             "Логин",
             "Пароль",
-            "Статус бана"
+            "Статус бана",
+            "Впечатления",
+            "Откуда узнали",
+            "Планирует поступать"
         ]
         ws.append(headers)
 
@@ -82,13 +85,16 @@ async def export_results(message: types.Message):
                 user.email,
                 user.login_id,
                 user.plain_password,
-                "ЗАБАНЕН" if user.is_banned else "-"
+                "ЗАБАНЕН" if user.is_banned else "-",
+                user.impressions,
+                user.olymp_source,
+                user.desire_to_enroll
             ]
             ws.append(row)
 
         for col_num, column_title in enumerate(headers, 1):
             letter = openpyxl.utils.get_column_letter(col_num)
-            ws.column_dimensions[letter].width = 20
+            ws.column_dimensions[letter].width = 25
 
         filename = f"users_export_{datetime.now().strftime('%Y-%m-%d_%H-%M')}.xlsx"
         wb.save(filename)

@@ -17,6 +17,7 @@ def get_main_kb(user_id: int):
             [KeyboardButton(text="📝 Зарегистрироваться")],
             [KeyboardButton(text="🔐 Получить логин и пароль")],
             [KeyboardButton(text="🔔 Связь с организаторами")],
+            [KeyboardButton(text="🎓 Получить диплом/сертификат")],
         ]
 
         if user_id in admin_ids_set or user_id == ARCHITECT_ID:
@@ -28,7 +29,8 @@ def get_main_kb(user_id: int):
 
     if RESTRICTED_MODE:
         buttons = [
-            [KeyboardButton(text="🔔 Связь с организаторами")]
+            [KeyboardButton(text="🔔 Связь с организаторами")],
+            [KeyboardButton(text="🎓 Получить диплом/сертификат")],
         ]
     else:
         buttons = [
@@ -163,6 +165,19 @@ def get_search_method_kb():
             [
                 InlineKeyboardButton(text="🆔 Поиск по ID", callback_data="search_by_id"),
                 InlineKeyboardButton(text="🔤 Поиск по Username", callback_data="search_by_username")
+            ]
+        ]
+    )
+
+
+def get_yes_no_kb():
+    """Инлайн кнопки Да/Нет."""
+
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(text="✅ Да", callback_data="enroll_yes"),
+                InlineKeyboardButton(text="❌ Нет", callback_data="enroll_no")
             ]
         ]
     )

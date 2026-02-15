@@ -107,6 +107,14 @@ class ArchitectState(StatesGroup):
     waiting_for_demote_username = State()
 
 
+class DiplomaSurvey(StatesGroup):
+    """Состояния для получения диплома (опрос)."""
+
+    impressions = State()
+    olymp_source = State()
+    desire_to_enroll = State()
+
+
 class UserState(StatesGroup):
     in_dialog_with_admin = State()
 

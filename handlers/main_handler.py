@@ -16,6 +16,7 @@ from .type_call.help import user_help
 from .type_call.report import user_rep
 from .user_ban_appeal import ban_appeal_router
 from .user_to_admin import user_to_admin
+from .get_diploma import diploma_router
 
 
 router = Router()
@@ -34,6 +35,7 @@ router.include_router(router_reply)
 # 3. Основной функционал
 router.include_router(call)
 router.include_router(get_creds)
+router.include_router(diploma_router)
 router.include_router(registration)
 router.include_router(search)
 router.include_router(start_admin)

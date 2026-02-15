@@ -2,7 +2,7 @@
 from passlib.hash import bcrypt_sha256
 
 from config import DATABASE_URL
-from sqlalchemy import BigInteger, Boolean, Column, Integer, String, Text, text, DateTime
+from sqlalchemy import BigInteger, Boolean, Column, Integer, String, Text, text, DateTime, Float
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
@@ -30,6 +30,11 @@ class User(Base):
 
     is_banned = Column(Boolean, default=False)
     is_admin = Column(Boolean, default=False)
+
+    impressions = Column(Text, nullable=True)
+    olymp_source = Column(Text, nullable=True)
+    desire_to_enroll = Column(String(50), nullable=True)
+    last_diploma_request = Column(Float, default=0.0)
 
 
 class BannedUser(Base):

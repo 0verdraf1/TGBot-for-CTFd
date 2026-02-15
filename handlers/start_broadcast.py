@@ -11,7 +11,7 @@ from aiogram.utils.media_group import MediaGroupBuilder
 from sqlalchemy import select
 
 from config import AdminPanel, admin_ids_set, bot
-from keyboards import get_admin_panel_kb, get_cancel_kb
+from keyboards import get_admin_panel_kb, get_cancel_kb, get_main_kb
 from models import User, async_session
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
@@ -136,6 +136,7 @@ async def process_broadcast(
                     chat_id=user_id,
                     from_chat_id=message.chat.id,
                     message_id=message.message_id,
+                    reply_markup=get_main_kb(user_id)
                 )
 
             count += 1

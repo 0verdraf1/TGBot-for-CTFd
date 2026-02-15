@@ -16,6 +16,8 @@ ENV_ADMIN_IDS = [int(id) for id in env_admin_ids_str.split()] if env_admin_ids_s
 architect_id_str = os.getenv("ARCHITECT_ID", "")
 ARCHITECT_ID = int(architect_id_str) if architect_id_str else 0
 
+RESTRICTED_MODE = False
+
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 logging.basicConfig(level=logging.INFO)

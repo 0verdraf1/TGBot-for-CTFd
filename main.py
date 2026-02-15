@@ -1,10 +1,9 @@
 """Запуск бота."""
 import asyncio
-import asyncio
 
 from config import admin_ids_set, banned_ids, bot, dp
 from handlers.main_handler import router
-from middlewares import BanMiddleware, MediaGroupMiddleware
+from middlewares import BanMiddleware, MediaGroupMiddleware, AccessMiddleware
 from models import User, async_session, init_db
 from models import update_all_users_scores
 from sqlalchemy import select
@@ -40,6 +39,10 @@ async def main():
 
     await init_db()
     await load_cache()
+
+    dp.message.middleware(AccessMiddleware())
+    dp.callback_query.outer_middleware(AccessMiddleware())
+
     dp.message.outer_middleware(BanMiddleware())
     dp.callback_query.outer_middleware(BanMiddleware())
 

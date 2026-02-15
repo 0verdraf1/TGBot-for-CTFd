@@ -9,7 +9,7 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.media_group import MediaGroupBuilder
 
 from config import Support, active_alerts, admin_ids_set, bot, try_delete
-from keyboards import get_main_kb
+from keyboards import get_main_kb, get_cancel_kb
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '...'))
 
@@ -22,11 +22,14 @@ async def start_support(callback: types.CallbackQuery, state: FSMContext):
     """Ввод описания проблемы."""
 
     await state.set_state(Support.waiting_for_message)
-    await callback.message.edit_text(
+    await try_delete(bot, callback.message.chat.id, callback.message.message_id)
+
+    await callback.message.answer(
         "Опишите вашу проблему одним сообщением (можно прикрепить фото), "
         "и организатор ответит вам здесь.",
-        reply_markup=None,
+        reply_markup=get_cancel_kb(),
     )
+
     await state.update_data(last_bot_msg_id=callback.message.message_id)
     await callback.answer()
 

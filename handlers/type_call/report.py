@@ -9,7 +9,7 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.media_group import MediaGroupBuilder
 
 from config import Report, active_alerts, admin_ids_set, bot, try_delete
-from keyboards import get_main_kb
+from keyboards import get_main_kb, get_cancel_kb
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '...'))
 
@@ -22,9 +22,11 @@ async def start_report(callback: types.CallbackQuery, state: FSMContext):
     """Начало составления репорта."""
 
     await state.set_state(Report.offender_username)
-    await callback.message.edit_text(
+    await try_delete(bot, callback.message.chat.id, callback.message.message_id)
+
+    await callback.message.answer(
         "Введите имя пользователя нарушителя (начинается с @):",
-        reply_markup=None,
+        reply_markup=get_cancel_kb()
     )
     await state.update_data(last_bot_msg_id=callback.message.message_id)
     await callback.answer()
@@ -40,7 +42,10 @@ async def process_report_username(message: types.Message, state: FSMContext):
     await try_delete(bot, message.chat.id, message.message_id)
 
     if not message.text.startswith("@"):
-        msg = await message.answer("❌ Имя должно начинаться с @. Попробуйте снова:")
+        msg = await message.answer(
+            "❌ Имя должно начинаться с @. Попробуйте снова:",
+            reply_markup=get_cancel_kb()
+        )
         await state.update_data(last_bot_msg_id=msg.message_id)
         return
 
@@ -62,7 +67,8 @@ async def process_report_desc(message: types.Message, state: FSMContext):
     await state.update_data(description=message.text)
     await state.set_state(Report.proof)
     msg = await message.answer(
-        "Отправьте доказательства (фото, скриншот) или напишите 'нет'."
+        "Отправьте доказательства (фото, скриншот) или напишите 'нет'.",
+        reply_markup=get_cancel_kb()
     )
     await state.update_data(last_bot_msg_id=msg.message_id)
 

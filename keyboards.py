@@ -6,23 +6,36 @@ from aiogram.types import (
     ReplyKeyboardMarkup,
 )
 
-from config import admin_ids_set, ARCHITECT_ID
+from config import admin_ids_set, ARCHITECT_ID, RESTRICTED_MODE
 
 
 def get_main_kb(user_id: int):
     """Панель участника олимпиады."""
 
-    buttons = [
-        [KeyboardButton(text="📝 Зарегистрироваться")],
-        [KeyboardButton(text="🔐 Получить логин и пароль")],
-        [KeyboardButton(text="🔔 Связь с организаторами")],
-    ]
+    if user_id in admin_ids_set or user_id == ARCHITECT_ID:
+        buttons = [
+            [KeyboardButton(text="📝 Зарегистрироваться")],
+            [KeyboardButton(text="🔐 Получить логин и пароль")],
+            [KeyboardButton(text="🔔 Связь с организаторами")],
+        ]
 
-    if user_id in admin_ids_set:
-        buttons.append([KeyboardButton(text="🦾 Админ-панель")])
+        if user_id in admin_ids_set or user_id == ARCHITECT_ID:
+            buttons.append([KeyboardButton(text="🦾 Админ-панель")])
+        if user_id == ARCHITECT_ID:
+            buttons.append([KeyboardButton(text="🛜 Панель Архитектора")])
 
-    if user_id == ARCHITECT_ID:
-        buttons.append([KeyboardButton(text="🛜 Панель Архитектора")])
+        return ReplyKeyboardMarkup(keyboard=buttons, resize_keyboard=True)
+
+    if RESTRICTED_MODE:
+        buttons = [
+            [KeyboardButton(text="🔔 Связь с организаторами")]
+        ]
+    else:
+        buttons = [
+            [KeyboardButton(text="📝 Зарегистрироваться")],
+            [KeyboardButton(text="🔐 Получить логин и пароль")],
+            [KeyboardButton(text="🔔 Связь с организаторами")],
+        ]
 
     return ReplyKeyboardMarkup(keyboard=buttons, resize_keyboard=True)
 
